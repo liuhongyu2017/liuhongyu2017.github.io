@@ -130,7 +130,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-count">9</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -141,7 +141,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-count">12</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -171,6 +171,157 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://liuhongyu2017.github.io/2021/07/29/jdk11%E6%96%B0%E5%A2%9E%E5%8A%A0%E5%86%85%E5%AE%B9/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="lhy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="偷得浮生半日闲">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/07/29/jdk11%E6%96%B0%E5%A2%9E%E5%8A%A0%E5%86%85%E5%AE%B9/" class="post-title-link" itemprop="url">jdk11新增加内容</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-07-29 16:00:44 / 修改时间：16:47:19" itemprop="dateCreated datePublished" datetime="2021-07-29T16:00:44+08:00">2021-07-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="增强api"><a href="#增强api" class="headerlink" title="增强api"></a>增强api</h2><hr>
+<ol>
+<li><p>字符串增强 @since 11</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 判断字符串是否为空白</span></span><br><span class="line"><span class="string">&quot; &quot;</span>.isBlank(); <span class="comment">// true</span></span><br><span class="line"><span class="comment">// 去除首尾空格</span></span><br><span class="line"><span class="string">&quot; Hello Java11 &quot;</span>.strip(); <span class="comment">// &quot;Hello Java11&quot;</span></span><br><span class="line"><span class="comment">// 去除尾部空格 </span></span><br><span class="line"><span class="string">&quot; Hello Java11 &quot;</span>.stripTrailing(); <span class="comment">// &quot; Hello Java11&quot;</span></span><br><span class="line"><span class="comment">// 去除首部空格 </span></span><br><span class="line"><span class="string">&quot; Hello Java11 &quot;</span>.stripLeading(); <span class="comment">// &quot;Hello Java11 &quot;</span></span><br><span class="line"><span class="comment">// 复制字符串</span></span><br><span class="line"><span class="string">&quot;Java11&quot;</span>.repeat(<span class="number">3</span>); <span class="comment">// &quot;Java11Java11Java11&quot;</span></span><br><span class="line"><span class="comment">// 行数统计</span></span><br><span class="line"><span class="string">&quot;A\nB\nC&quot;</span>.lines().count(); <span class="comment">// 3</span></span><br></pre></td></tr></table></figure></li>
+<li><p>集合增强</p>
+<ul>
+<li>of() @since 9</li>
+<li>copyOf() @since 10</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> list = List.of(<span class="string">&quot;Java&quot;</span>, <span class="string">&quot;Python&quot;</span>, <span class="string">&quot;C&quot;</span>); <span class="comment">//不可变集合</span></span><br><span class="line"><span class="keyword">var</span> copy = List.copyOf(list); <span class="comment">//copyOf判断是否是不可变集合类型，如果是直接返回</span></span><br><span class="line">System.out.println(list == copy); <span class="comment">// true</span></span><br><span class="line"><span class="keyword">var</span> list = <span class="keyword">new</span> ArrayList&lt;String&gt;(); <span class="comment">// 这里返回正常的集合</span></span><br><span class="line"><span class="keyword">var</span> copy = List.copyOf(list); <span class="comment">// 这里返回一个不可变集合</span></span><br><span class="line">System.out.println(list == copy); <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> set = Set.of(<span class="string">&quot;Java&quot;</span>, <span class="string">&quot;Python&quot;</span>, <span class="string">&quot;C&quot;</span>);</span><br><span class="line"><span class="keyword">var</span> copy = Set.copyOf(set);</span><br><span class="line">System.out.println(set == copy); <span class="comment">// true</span></span><br><span class="line"><span class="keyword">var</span> set1 = <span class="keyword">new</span> HashSet&lt;String&gt;();</span><br><span class="line"><span class="keyword">var</span> copy1 = List.copyOf(set1);</span><br><span class="line">System.out.println(set1 == copy1); <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> map = Map.of(<span class="string">&quot;Java&quot;</span>, <span class="number">1</span>, <span class="string">&quot;Python&quot;</span>, <span class="number">2</span>, <span class="string">&quot;C&quot;</span>, <span class="number">3</span>);</span><br><span class="line"><span class="keyword">var</span> copy = Map.copyOf(map);</span><br><span class="line">System.out.println(map == copy); <span class="comment">// true</span></span><br><span class="line"><span class="keyword">var</span> map1 = <span class="keyword">new</span> HashMap&lt;String, Integer&gt;();</span><br><span class="line"><span class="keyword">var</span> copy1 = Map.copyOf(map1);</span><br><span class="line">System.out.println(map1 == copy1); <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：使用 of 和 copyOf 创建的集合为不可变集合，不能进行添加、删除、替换、排序等操作，不然会报java.lang.UnsupportedOperationException异常，使用Set.of()不能出现重复元素、Map.of()不能出现重复key，否则回报java.lang.IllegalArgumentException。</p>
+</blockquote>
+</li>
+<li><p>Stream增强 @since 9</p>
+<p>Stream 是 Java 8 中的特性，在 Java 9 中为其增加了4种方法</p>
+<ol>
+<li><p>ofNullable(T t)</p>
+<p>此方法可以接收null来创建一个空流</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 以前</span></span><br><span class="line">Stream.of(<span class="keyword">null</span>); <span class="comment">//报错</span></span><br><span class="line"><span class="comment">// 现在</span></span><br><span class="line">Stream.ofNullable(<span class="keyword">null</span>);</span><br></pre></td></tr></table></figure></li>
+<li><p>takeWhile(Predicate&lt;? super T&gt; predicate)</p>
+<p>此方法根据Predicate接口来判断如果为true就 取出 来生成一个新的流,只要碰到false就终止，不管后边的元素是否符合条件。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;Integer&gt; integerStream = Stream.of(<span class="number">6</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">15</span>, <span class="number">20</span>);</span><br><span class="line">Stream&lt;Integer&gt; takeWhile = integerStream.takeWhile(t -&gt; t % <span class="number">2</span> == <span class="number">0</span>);</span><br><span class="line">takeWhile.forEach(System.out::println); <span class="comment">// 6,10</span></span><br></pre></td></tr></table></figure></li>
+<li><p>dropWhile(Predicate&lt;? super T&gt; predicate)</p>
+<p>此方法根据Predicate接口来判断如果为true就 丢弃来生成一个新的流,只要碰到false就终止，不管后边的元素是否符合条件。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;Integer&gt; integerStream = Stream.of(<span class="number">6</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">15</span>, <span class="number">20</span>);</span><br><span class="line">Stream&lt;Integer&gt; takeWhile = integerStream.dropWhile(t -&gt; t % <span class="number">2</span> == <span class="number">0</span>);</span><br><span class="line">takeWhile.forEach(System.out::println); <span class="comment">//11,15,20</span></span><br></pre></td></tr></table></figure></li>
+<li><p>iterate重载</p>
+<p>以前使用iterate方法生成无限流需要配合limit进行截断</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;Integer&gt; limit = Stream.iterate(<span class="number">1</span>, i -&gt; i + <span class="number">1</span>).limit(<span class="number">5</span>);</span><br><span class="line">limit.forEach(System.out::println); <span class="comment">//1,2,3,4,5</span></span><br></pre></td></tr></table></figure>
+
+<p>现在重载后这个方法增加了个判断参数</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;Integer&gt; iterate = Stream.iterate(<span class="number">1</span>, i -&gt; i &lt;= <span class="number">5</span>, i -&gt; i + <span class="number">1</span>);</span><br><span class="line">iterate.forEach(System.out::println); <span class="comment">//1,2,3,4,5</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+</li>
+<li><p>Optional增强 @since 9</p>
+<ol>
+<li><p>stream()</p>
+<p>如果为空返回一个空流，如果不为空将Optional的值转成一个流。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//返回Optional值的流</span></span><br><span class="line">Stream&lt;String&gt; stream = Optional.of(<span class="string">&quot;Java 11&quot;</span>).stream();</span><br><span class="line">stream.forEach(System.out::println); <span class="comment">// Java 11</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//返回空流</span></span><br><span class="line">Stream&lt;Object&gt; stream = Optional.ofNullable(<span class="keyword">null</span>).stream();</span><br><span class="line">stream.forEach(System.out::println); <span class="comment">// </span></span><br></pre></td></tr></table></figure></li>
+<li><p>ifPresentOrElse(Consumer&lt;? super T&gt; action, Runnable emptyAction)</p>
+<p>个人感觉这个方法就是结合isPresent()对Else的增强，ifPresentOrElse 方法的用途是，如果一个 Optional 包含值，则对其包含的值调用函数 action，即 action.accept(value)，这与 ifPresent 一致；与 ifPresent 方法的区别在于，ifPresentOrElse 还有第二个参数 emptyAction —— 如果 Optional 不包含值，那么 ifPresentOrElse 便会调用 emptyAction，即 emptyAction.run()。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Optional&lt;Integer&gt; optional = Optional.of(<span class="number">1</span>);</span><br><span class="line">optional.ifPresentOrElse( x -&gt; System.out.println(<span class="string">&quot;Value: &quot;</span> + x),() -&gt; System.out.println(<span class="string">&quot;Not Present.&quot;</span>)); <span class="comment">//Value: 1</span></span><br><span class="line"></span><br><span class="line">optional = Optional.empty();</span><br><span class="line">optional.ifPresentOrElse( x -&gt; System.out.println(<span class="string">&quot;Value: &quot;</span> + x),() -&gt; System.out.println(<span class="string">&quot;Not Present.&quot;</span>)); <span class="comment">//Not Present.</span></span><br></pre></td></tr></table></figure></li>
+<li><p>or(Supplier&lt;? extends Optional&lt;? extends T&gt;&gt; supplier)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Optional&lt;String&gt; optional1 = Optional.of(<span class="string">&quot;Java&quot;</span>);</span><br><span class="line">Supplier&lt;Optional&lt;String&gt;&gt; supplierString = () -&gt; Optional.of(<span class="string">&quot;Not Present&quot;</span>);</span><br><span class="line">optional1 = optional1.or( supplierString);</span><br><span class="line">optional1.ifPresent( x -&gt; System.out.println(<span class="string">&quot;Value: &quot;</span> + x)); <span class="comment">//Value: Java</span></span><br><span class="line">optional1 = Optional.empty();</span><br><span class="line">optional1 = optional1.or( supplierString);</span><br><span class="line">optional1.ifPresent( x -&gt; System.out.println(<span class="string">&quot;Value: &quot;</span> + x)); <span class="comment">//Value: Not Present</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+</li>
+<li><p>InputStream增强 @since 9</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">String lxs = <span class="string">&quot;java&quot;</span>;</span><br><span class="line"><span class="keyword">try</span> (<span class="keyword">var</span> inputStream = <span class="keyword">new</span> ByteArrayInputStream(lxs.getBytes());</span><br><span class="line">	<span class="keyword">var</span> outputStream = <span class="keyword">new</span> ByteArrayOutputStream()) &#123;</span><br><span class="line">	inputStream.transferTo(outputStream);</span><br><span class="line">	System.out.println(outputStream); <span class="comment">//java</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="HTTP-Client-API"><a href="#HTTP-Client-API" class="headerlink" title="HTTP Client API"></a>HTTP Client API</h2><hr>
+<p>改api支持同步和异步两种方式，下面是两种方式的示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> request = HttpRequest.newBuilder()</span><br><span class="line">	.uri(URI.create(<span class="string">&quot;https://www.baidu.com/&quot;</span>))</span><br><span class="line">	.build();</span><br><span class="line"><span class="keyword">var</span> client = HttpClient.newHttpClient();</span><br><span class="line"><span class="comment">// 同步</span></span><br><span class="line">HttpResponse&lt;String&gt; response = client.send(request, HttpResponse.BodyHandlers.ofString());</span><br><span class="line">System.out.println(response.body());</span><br><span class="line"><span class="comment">// 异步</span></span><br><span class="line">CompletableFuture&lt;HttpResponse&lt;String&gt;&gt; sendAsync = client.sendAsync(request, HttpResponse.BodyHandlers.ofString());</span><br><span class="line"><span class="comment">//这里会阻塞</span></span><br><span class="line">HttpResponse&lt;String&gt; response1 = sendAsync.get();</span><br><span class="line">System.out.println(response1.body());</span><br></pre></td></tr></table></figure>
+
+<h2 id="移除内容"><a href="#移除内容" class="headerlink" title="移除内容"></a>移除内容</h2><hr>
+<ul>
+<li>com.sun.awt.AWTUtilities。</li>
+<li>sun.misc.Unsafe.defineClass 使用java.lang.invoke.MethodHandles.Lookup.defineClass来替代。</li>
+<li>Thread.destroy() 以及 Thread.stop(Throwable) 方法。</li>
+<li>sun.nio.ch.disableSystemWideOverlappingFileLockCheck 属性</li>
+<li>sun.locale.formatasdefault 属性。</li>
+<li>jdk snmp 模块。</li>
+<li>javafx，openjdk 是从java10版本就移除了，oracle java10还尚未移除javafx ，而java11版本将javafx也移除了。</li>
+<li>Java Mission Control，从JDK中移除之后，需要自己单独下载。</li>
+<li>Root Certificates ：Baltimore Cybertrust Code Signing CA，SECOM ，AOL and Swisscom。</li>
+<li>在java11中将java9标记废弃的Java EE及CORBA模块移除掉。</li>
+</ul>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/07/29/jdk11%E6%96%B0%E5%A2%9E%E5%8A%A0%E5%86%85%E5%AE%B9/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
