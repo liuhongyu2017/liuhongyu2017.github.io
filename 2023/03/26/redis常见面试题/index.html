@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.0.0-rc1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"liuhongyu2017.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"width":300},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Redis是单线程还是多线程？redis不同版本之间采用的线程模式是不一样的，在redis4.0版本之前使用的是单线程模式，在4.0版本之后增加了多线程的支持。在4.0之前虽然我们说redis是单线程，也只是说它的网络I&#x2F;O线程以及Set和Get操作是由一个线程完成的。但是Redis的持久化、集群同步还是 使用其他线程完成。4.0之后添加了多线程的支持，主要是体现在大数据的异步删除功能上">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis常见面试题">
+<meta property="og:url" content="https://liuhongyu2017.github.io/2023/03/26/redis%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/index.html">
+<meta property="og:site_name" content="不是深谷">
+<meta property="og:description" content="Redis是单线程还是多线程？redis不同版本之间采用的线程模式是不一样的，在redis4.0版本之前使用的是单线程模式，在4.0版本之后增加了多线程的支持。在4.0之前虽然我们说redis是单线程，也只是说它的网络I&#x2F;O线程以及Set和Get操作是由一个线程完成的。但是Redis的持久化、集群同步还是 使用其他线程完成。4.0之后添加了多线程的支持，主要是体现在大数据的异步删除功能上">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://liuhongyu2017.github.io/2023/03/26/redis%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/redis-aof.png">
+<meta property="og:image" content="https://liuhongyu2017.github.io/2023/03/26/redis%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/redis-rdb.png">
+<meta property="og:image" content="https://liuhongyu2017.github.io/2023/03/26/redis%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/%E4%B8%BB%E4%BB%8E%E6%A8%A1%E5%BC%8F.png">
+<meta property="article:published_time" content="2023-03-26T10:42:25.000Z">
+<meta property="article:modified_time" content="2023-04-03T00:09:38.601Z">
+<meta property="article:author" content="不是深谷">
+<meta property="article:tag" content="redis">
+<meta property="article:tag" content="面试">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://liuhongyu2017.github.io/2023/03/26/redis%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/redis-aof.png">
+
+
+<link rel="canonical" href="https://liuhongyu2017.github.io/2023/03/26/redis%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://liuhongyu2017.github.io/2023/03/26/redis%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/","path":"2023/03/26/redis常见面试题/","title":"redis常见面试题"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>redis常见面试题 | 不是深谷</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">不是深谷</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里不是深谷，所以没有回声。</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-首页"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-标签"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-类别"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>类别</a></li><li class="menu-item menu-item-归档"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Redis%E6%98%AF%E5%8D%95%E7%BA%BF%E7%A8%8B%E8%BF%98%E6%98%AF%E5%A4%9A%E7%BA%BF%E7%A8%8B%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">Redis是单线程还是多线程？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88Redis%E5%9C%A84-0%E4%B9%8B%E5%89%8D%E4%BC%9A%E9%80%89%E6%8B%A9%E4%BD%BF%E7%94%A8%E5%8D%95%E7%BA%BF%E7%A8%8B%EF%BC%9F%E8%80%8C%E4%B8%94%E4%BD%BF%E7%94%A8%E5%8D%95%E7%BA%BF%E7%A8%8B%E8%BF%98%E9%82%A3%E4%B9%88%E5%BF%AB%EF%BC%9F"><span class="nav-number">2.</span> <span class="nav-text">为什么Redis在4.0之前会选择使用单线程？而且使用单线程还那么快？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Redis%E6%98%AF%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E6%95%B0%E6%8D%AE%E4%B8%8D%E4%B8%A2%E5%A4%B1%EF%BC%9F"><span class="nav-number">3.</span> <span class="nav-text">Redis是如何实现数据不丢失？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#AOF%E5%92%8CRDB%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86%EF%BC%9F"><span class="nav-number">4.</span> <span class="nav-text">AOF和RDB的实现原理？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#AOF%E9%87%87%E7%94%A8%E7%9A%84%E6%98%AF%E2%80%9C%E5%86%99%E5%90%8E%E6%97%A5%E5%BF%97%E2%80%9D%E6%96%B9%E5%BC%8F%EF%BC%8C%E6%88%91%E4%BB%AC%E5%B9%B3%E6%97%B6%E7%94%A8%E7%9A%84MySQL%E5%88%99%E9%87%87%E7%94%A8%E7%9A%84%E6%98%AF%E2%80%9C%E5%86%99%E5%89%8D%E6%97%A5%E5%BF%97%E2%80%9D%EF%BC%8C%E9%82%A3Redis%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E5%85%88%E6%89%A7%E8%A1%8C%E5%91%BD%E4%BB%A4%EF%BC%8C%E5%86%8D%E6%8A%8A%E6%95%B0%E6%8D%AE%E5%86%99%E5%85%A5%E6%97%A5%E5%BF%97%E5%91%A2%EF%BC%9F"><span class="nav-number">5.</span> <span class="nav-text">AOF采用的是“写后日志”方式，我们平时用的MySQL则采用的是“写前日志”，那Redis为什么要先执行命令，再把数据写入日志呢？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RDB%E5%81%9A%E5%BF%AB%E7%85%A7%E6%97%B6%E4%BC%9A%E9%98%BB%E5%A1%9E%E7%BA%BF%E7%A8%8B%E5%90%97%EF%BC%9F"><span class="nav-number">6.</span> <span class="nav-text">RDB做快照时会阻塞线程吗？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RDB%E5%81%9A%E5%BF%AB%E7%85%A7%E7%9A%84%E6%97%B6%E5%80%99%E6%95%B0%E6%8D%AE%E8%83%BD%E4%BF%AE%E6%94%B9%E5%90%97%EF%BC%9F"><span class="nav-number">7.</span> <span class="nav-text">RDB做快照的时候数据能修改吗？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%82%A3Redis%E6%98%AF%E6%80%8E%E4%B9%88%E8%A7%A3%E5%86%B3%E5%9C%A8bgsave%E5%81%9A%E5%BF%AB%E7%85%A7%E7%9A%84%E6%97%B6%E5%80%99%E5%85%81%E8%AE%B8%E6%95%B0%E6%8D%AE%E4%BF%AE%E6%94%B9%E5%91%A2%EF%BC%9F"><span class="nav-number">8.</span> <span class="nav-text">那Redis是怎么解决在bgsave做快照的时候允许数据修改呢？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#redis%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E9%AB%98%E5%8F%AF%E7%94%A8%EF%BC%9F"><span class="nav-number">9.</span> <span class="nav-text">redis如何实现高可用？</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6"><span class="nav-number">9.1.</span> <span class="nav-text">1.主从复制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%93%A8%E5%85%B5%E6%A8%A1%E5%BC%8F"><span class="nav-number">9.2.</span> <span class="nav-text">2.哨兵模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Redis%E9%9B%86%E7%BE%A4"><span class="nav-number">9.3.</span> <span class="nav-text">3.Redis集群</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%93%A8%E5%85%B5%E6%A8%A1%E5%BC%8F%E5%9C%A8%E6%95%B0%E6%8D%AE%E4%B8%8A%E6%9C%89%E5%89%AF%E6%9C%AC%E6%95%B0%E6%8D%AE%E5%81%9A%E4%BF%9D%E8%AF%81%EF%BC%8C%E5%9C%A8%E5%8F%AF%E7%94%A8%E6%80%A7%E4%B8%8A%E5%8F%88%E6%9C%89%E5%93%A8%E5%85%B5%E7%9B%91%E6%8E%A7%EF%BC%8C%E4%B8%80%E6%97%A6master%E5%AE%95%E6%9C%BA%E4%BC%9A%E9%80%89%E4%B8%BEsalve%E8%8A%82%E7%82%B9%E4%B8%BAmaster%E8%8A%82%E7%82%B9%EF%BC%8C%E8%BF%99%E7%A7%8D%E5%B7%B2%E7%BB%8F%E6%BB%A1%E8%B6%B3%E4%BA%86%E6%88%91%E4%BB%AC%E7%94%9F%E6%88%90%E7%8E%AF%E5%A2%83%E9%9C%80%E8%A6%81%EF%BC%8C%E9%82%A3%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%98%E8%A6%81%E4%BD%BF%E7%94%A8%E9%9B%86%E7%BE%A4%E6%A8%A1%E5%BC%8F%E5%91%A2%EF%BC%9F"><span class="nav-number">10.</span> <span class="nav-text">使用哨兵模式在数据上有副本数据做保证，在可用性上又有哨兵监控，一旦master宕机会选举salve节点为master节点，这种已经满足了我们生成环境需要，那为什么还要使用集群模式呢？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%9B%86%E7%BE%A4%E4%B8%AD%E9%82%A3%E4%B9%88%E5%A4%9AMaster%E8%8A%82%E7%82%B9%EF%BC%8Credis-cluster%E5%9C%A8%E5%82%A8%E5%AD%98%E7%9A%84%E6%97%B6%E5%80%99%E5%A6%82%E4%BD%95%E7%A1%AE%E5%AE%9A%E9%80%89%E6%8B%A9%E9%82%A3%E4%B8%AA%E8%8A%82%E7%82%B9%E5%91%A2%EF%BC%9F"><span class="nav-number">11.</span> <span class="nav-text">集群中那么多Master节点，redis cluster在储存的时候如何确定选择那个节点呢？</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="不是深谷"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">不是深谷</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://liuhongyu2017.github.io/2023/03/26/redis%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="不是深谷">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不是深谷">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="redis常见面试题 | 不是深谷">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          redis常见面试题
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-03-26 18:42:25" itemprop="dateCreated datePublished" datetime="2023-03-26T18:42:25+08:00">2023-03-26</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-04-03 08:09:38" itemprop="dateModified" datetime="2023-04-03T08:09:38+08:00">2023-04-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/redis/" itemprop="url" rel="index"><span itemprop="name">redis</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="Redis是单线程还是多线程？"><a href="#Redis是单线程还是多线程？" class="headerlink" title="Redis是单线程还是多线程？"></a>Redis是单线程还是多线程？</h1><p>redis不同版本之间采用的线程模式是不一样的，在redis4.0版本之前使用的是单线程模式，在4.0版本之后增加了多线程的支持。<br>在4.0之前虽然我们说redis是单线程，也只是说它的网络I&#x2F;O线程以及Set和Get操作是由一个线程完成的。但是Redis的持久化、集群同步还是 使用其他线程完成。<br>4.0之后添加了多线程的支持，主要是体现在大数据的异步删除功能上，例如<code>unlink</code>、<code>flushdb async</code>、<code>flushall async</code>等。</p>
+<h1 id="为什么Redis在4-0之前会选择使用单线程？而且使用单线程还那么快？"><a href="#为什么Redis在4-0之前会选择使用单线程？而且使用单线程还那么快？" class="headerlink" title="为什么Redis在4.0之前会选择使用单线程？而且使用单线程还那么快？"></a>为什么Redis在4.0之前会选择使用单线程？而且使用单线程还那么快？</h1><p>选择使用单线程，主要是使用简单，不存在锁竞争，可以在无锁的情况下完成所有操作，不存在死锁和线程切换带来的性能和时间上的开销，但同时单线程也不能完全发挥出多核CPU的性能。<br>为什么单线程那么快，主要有以下几个原因：</p>
+<ol>
+<li>Redis的大部分操作都在内存中完成，内存中的执行效率本身就很快，并且采用了高效的数据结构，比如哈希表和跳表。</li>
+<li>使用了单线程避免了多线程竞争，省去了多线程切换带来的时间和性能开销，并且不会出现死锁。</li>
+<li>采用I&#x2F;O多路复用机制处理大量客户端的Socket请求，因为这是基于非柱塞的I&#x2F;O模型，这就让Redis可以高效的进行网络通讯，I&#x2F;O的读写流程也不用柱塞。</li>
+</ol>
+<h1 id="Redis是如何实现数据不丢失？"><a href="#Redis是如何实现数据不丢失？" class="headerlink" title="Redis是如何实现数据不丢失？"></a>Redis是如何实现数据不丢失？</h1><p>Redis数据是储存在内存中的，为了保证Redis数据不丢失，那就要把数据从内存储存到磁盘上，以便在服务器重启后还能够从磁盘中恢复原有数据，这就是Redis的数据持久化。Redis持久化有三种方式。</p>
+<ul>
+<li>AOF日志（Append Only File，文件追加方式）：记录所有的操作命令，并以文本形式追加到文件中。</li>
+<li>RDB快照（Redis DataBase）：将某一个时刻的内存数据，以二进制的方式写入磁盘。</li>
+<li>混合持久化方式：Redis4.0新增了混合持久化的方式，集成了RDB和AOF的优点。</li>
+</ul>
+<h1 id="AOF和RDB的实现原理？"><a href="#AOF和RDB的实现原理？" class="headerlink" title="AOF和RDB的实现原理？"></a>AOF和RDB的实现原理？</h1><ol>
+<li><p>AOF采用的是写后日志的方式，Redis先执行命令把数据写入内存，然后再记录日志到文件中。AOF日志记录的是操作命令，不是实际的数据，如果采用AOF方法做故障恢复时需要将全量日志都执行一遍。</p>
+<img src="/2023/03/26/redis%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/redis-aof.png" class="" title="img">
+</li>
+<li><p>RDB采用的是内存快照的方式，它记录的是某一时刻的数据，而不是操作，所以采用RDB方法做故障恢复时只需要直接把RDB文件读入内存即可，实现快速恢复。</p>
+</li>
+</ol>
+<h1 id="AOF采用的是“写后日志”方式，我们平时用的MySQL则采用的是“写前日志”，那Redis为什么要先执行命令，再把数据写入日志呢？"><a href="#AOF采用的是“写后日志”方式，我们平时用的MySQL则采用的是“写前日志”，那Redis为什么要先执行命令，再把数据写入日志呢？" class="headerlink" title="AOF采用的是“写后日志”方式，我们平时用的MySQL则采用的是“写前日志”，那Redis为什么要先执行命令，再把数据写入日志呢？"></a>AOF采用的是“写后日志”方式，我们平时用的MySQL则采用的是“写前日志”，那Redis为什么要先执行命令，再把数据写入日志呢？</h1><p>这个主要是由于Redis在写入日志之前，不对命令进行语法检查，所以只记录执行成功命令，避免出现记录错误命令的情况，而且在命令执行后再写日志不会阻塞当前写操作。</p>
+<p>写后日志有什么风险：</p>
+<ul>
+<li>数据可能会丢失：如果Redis刚执行完成命令，此时发生故障宕机，会导致这条命令存在丢失的风险。</li>
+<li>可能阻塞其他操作：AOF日志其实也是在主线程中执行，所以当Redis把日志文件写入磁盘的时候，还是会阻塞后续的操作无法执行。</li>
+</ul>
+<h1 id="RDB做快照时会阻塞线程吗？"><a href="#RDB做快照时会阻塞线程吗？" class="headerlink" title="RDB做快照时会阻塞线程吗？"></a>RDB做快照时会阻塞线程吗？</h1><p>Redis提供了两个命令来生成RDB快照文件，分别是<code>save</code>和<code>bgsave</code>。<code>save</code>命令在主线程中执行，会导致阻塞。而<code>bgsave</code>命令则会创建一个子进程，用于写入RDB文件的操作，避免了对主线程的阻塞，这也是Redis RDB默认配置。</p>
+<h1 id="RDB做快照的时候数据能修改吗？"><a href="#RDB做快照的时候数据能修改吗？" class="headerlink" title="RDB做快照的时候数据能修改吗？"></a>RDB做快照的时候数据能修改吗？</h1><p>save是同步的会阻塞客户端命令，bgsave的时候是可以修改的。</p>
+<h1 id="那Redis是怎么解决在bgsave做快照的时候允许数据修改呢？"><a href="#那Redis是怎么解决在bgsave做快照的时候允许数据修改呢？" class="headerlink" title="那Redis是怎么解决在bgsave做快照的时候允许数据修改呢？"></a>那Redis是怎么解决在bgsave做快照的时候允许数据修改呢？</h1><p>这里主要是利用<code>bgsave</code>的子线程实现的，具体操作如下：</p>
+<ul>
+<li>如果主线程执行读操作，则主线程和<code>bgsave</code>子进程互不影响。</li>
+<li>如果主线程执行写操作，则被修改的数据会复制一份副本，然后&#96;bgsave子进程会把该副本数据写入RDB文件，在这个过程中，主线程仍然可以直接修改原来的数据。<img src="/2023/03/26/redis%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/redis-rdb.png" class="" title="img"></li>
+</ul>
+<p>要注意，Redis对RDB的执行频率非常重要，因为这会影响快照数据的完整性以及Redis的稳定性，所以在Redis4.0后，增加了AOF和RDB混合的数据持久化机制：把数据以RDB的方式写入文件，再将后续的操作命令以AOF的格式存入文件，既保证了Redis重启速度，又降低数据丢失风险。</p>
+<h1 id="redis如何实现高可用？"><a href="#redis如何实现高可用？" class="headerlink" title="redis如何实现高可用？"></a>redis如何实现高可用？</h1><p>Redis实现高可用主要有三种方式：主从复制、哨兵模式、以及Redis集群</p>
+<h2 id="1-主从复制"><a href="#1-主从复制" class="headerlink" title="1.主从复制"></a>1.主从复制</h2><p>将一台Redis服务器，同步数据到多台从Redis服务器上，即一主多从的模式，这个跟MySQL主从复制的原理一样。</p>
+<img src="/2023/03/26/redis%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98/%E4%B8%BB%E4%BB%8E%E6%A8%A1%E5%BC%8F.png" class="" title="img">
+
+<h2 id="2-哨兵模式"><a href="#2-哨兵模式" class="headerlink" title="2.哨兵模式"></a>2.哨兵模式</h2><p>使用Redis主从服务的时候，会有一个问题，就是当Redis的主服务器宕机时候，需要手动进行恢复，为了解决这个问题，Redis增加了哨兵模式（因为哨兵做到了可以监控主从服务器，并且提供了自动容灾难恢复功能）。</p>
+
+
+<h2 id="3-Redis集群"><a href="#3-Redis集群" class="headerlink" title="3.Redis集群"></a>3.Redis集群</h2><p>Redis Cluster是一种分布式去中心化的运行模式，实在Redis3.0版本中推出的Redis集群方案，它将数据分布在不同的服务器上，以此来降低系统对单节点的依赖，从而提高Redis服务读写性能。</p>
+
+
+<h1 id="使用哨兵模式在数据上有副本数据做保证，在可用性上又有哨兵监控，一旦master宕机会选举salve节点为master节点，这种已经满足了我们生成环境需要，那为什么还要使用集群模式呢？"><a href="#使用哨兵模式在数据上有副本数据做保证，在可用性上又有哨兵监控，一旦master宕机会选举salve节点为master节点，这种已经满足了我们生成环境需要，那为什么还要使用集群模式呢？" class="headerlink" title="使用哨兵模式在数据上有副本数据做保证，在可用性上又有哨兵监控，一旦master宕机会选举salve节点为master节点，这种已经满足了我们生成环境需要，那为什么还要使用集群模式呢？"></a>使用哨兵模式在数据上有副本数据做保证，在可用性上又有哨兵监控，一旦master宕机会选举salve节点为master节点，这种已经满足了我们生成环境需要，那为什么还要使用集群模式呢？</h1><p>哨兵模式归根还是主从复制模式，在主从模式下我们可以通过增加salve节点来扩展读并发能力，储存能力只能是master节点能够承载的上限。所以为了扩展写能力和储存能力，我们就需要引入集群模式。</p>
+<h1 id="集群中那么多Master节点，redis-cluster在储存的时候如何确定选择那个节点呢？"><a href="#集群中那么多Master节点，redis-cluster在储存的时候如何确定选择那个节点呢？" class="headerlink" title="集群中那么多Master节点，redis cluster在储存的时候如何确定选择那个节点呢？"></a>集群中那么多Master节点，redis cluster在储存的时候如何确定选择那个节点呢？</h1><p>Redis Cluster采用的是类一直性哈希算法实现节点选择的。<br>Redis Cluster将自己分成了16384个slot（槽位），哈希槽类似于数据分区，每个键值对都会根据它的key，被映射到一个哈希槽中，具体执行过程分为两大步骤。</p>
+<ul>
+<li>根据键值对的key，按照CRC16算法计算一个16bit的值。</li>
+<li>再用16bit值对16384取模，的到<code>0-16384</code>范围内模数，每个模数代表一个相应编号的哈希槽。</li>
+</ul>
+<p>每个Redis节点负责处理一部分槽位，假如有三个master节点ABC，每个节点负责的槽位如下。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/redis/" rel="tag"># redis</a>
+              <a href="/tags/%E9%9D%A2%E8%AF%95/" rel="tag"># 面试</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/07/22/vue%E9%83%A8%E7%BD%B2%E5%88%B0nginx%E4%B8%8A%E5%88%B7%E6%96%B0%E5%90%8E404/" rel="prev" title="vue部署到nginx上刷新后404">
+                  <i class="fa fa-chevron-left"></i> vue部署到nginx上刷新后404
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2023/04/03/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/" rel="next" title="分布式事务">
+                  分布式事务 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不是深谷</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

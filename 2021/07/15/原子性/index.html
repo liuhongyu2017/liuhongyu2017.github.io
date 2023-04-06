@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.0.0-rc1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"liuhongyu2017.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"width":300},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="原子性 参考文章地址：http:&#x2F;&#x2F;www.blogjava.net&#x2F;xylz&#x2F;archive&#x2F;2010&#x2F;07&#x2F;03&#x2F;325168.html  在 Java concurrency in Practic 中是这样定义线程安全的：当多个线程访问一个类时，如果不用考虑这些线程在运行时环境下的调度和交替运行，并且不需要额外的同步及在调度方面代码不必做其他的协调，这个类仍然是正确的，那么这个类是线程安全的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="原子性">
+<meta property="og:url" content="https://liuhongyu2017.github.io/2021/07/15/%E5%8E%9F%E5%AD%90%E6%80%A7/index.html">
+<meta property="og:site_name" content="不是深谷">
+<meta property="og:description" content="原子性 参考文章地址：http:&#x2F;&#x2F;www.blogjava.net&#x2F;xylz&#x2F;archive&#x2F;2010&#x2F;07&#x2F;03&#x2F;325168.html  在 Java concurrency in Practic 中是这样定义线程安全的：当多个线程访问一个类时，如果不用考虑这些线程在运行时环境下的调度和交替运行，并且不需要额外的同步及在调度方面代码不必做其他的协调，这个类仍然是正确的，那么这个类是线程安全的">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-07-15T13:37:48.000Z">
+<meta property="article:modified_time" content="2023-04-03T00:09:38.601Z">
+<meta property="article:author" content="不是深谷">
+<meta property="article:tag" content="java">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://liuhongyu2017.github.io/2021/07/15/%E5%8E%9F%E5%AD%90%E6%80%A7/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://liuhongyu2017.github.io/2021/07/15/%E5%8E%9F%E5%AD%90%E6%80%A7/","path":"2021/07/15/原子性/","title":"原子性"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>原子性 | 不是深谷</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">不是深谷</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里不是深谷，所以没有回声。</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-首页"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-标签"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-类别"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>类别</a></li><li class="menu-item menu-item-归档"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8E%9F%E5%AD%90%E6%80%A7"><span class="nav-number">1.</span> <span class="nav-text">原子性</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%A8-Java-concurrency-in-Practic-%E4%B8%AD%E6%98%AF%E8%BF%99%E6%A0%B7%E5%AE%9A%E4%B9%89%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%EF%BC%9A"><span class="nav-number">1.1.</span> <span class="nav-text">在 Java concurrency in Practic 中是这样定义线程安全的：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#volatile-%E8%AF%AD%E4%B9%89"><span class="nav-number">1.2.</span> <span class="nav-text">volatile 语义</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="不是深谷"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">不是深谷</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://liuhongyu2017.github.io/2021/07/15/%E5%8E%9F%E5%AD%90%E6%80%A7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="不是深谷">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不是深谷">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="原子性 | 不是深谷">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          原子性
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-07-15 21:37:48" itemprop="dateCreated datePublished" datetime="2021-07-15T21:37:48+08:00">2021-07-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-04-03 08:09:38" itemprop="dateModified" datetime="2023-04-03T08:09:38+08:00">2023-04-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="原子性"><a href="#原子性" class="headerlink" title="原子性"></a>原子性</h1><blockquote>
+<p>参考文章地址：<br><a target="_blank" rel="noopener" href="http://www.blogjava.net/xylz/archive/2010/07/03/325168.html">http://www.blogjava.net/xylz/archive/2010/07/03/325168.html</a></p>
+</blockquote>
+<h2 id="在-Java-concurrency-in-Practic-中是这样定义线程安全的："><a href="#在-Java-concurrency-in-Practic-中是这样定义线程安全的：" class="headerlink" title="在 Java concurrency in Practic 中是这样定义线程安全的："></a>在 Java concurrency in Practic 中是这样定义线程安全的：</h2><p>当多个线程访问一个类时，如果不用考虑这些线程在运行时环境下的调度和交替运行，并且不需要额外的同步及在调度方面代码不必做其他的协调，这个类仍然是正确的，那么这个类是线程安全的。</p>
+<p>显然只有资源竞争才会导致线程不安全，因此<strong>无状态对象永远是线程安全的</strong>。</p>
+<p>原子操作的描述是：<strong>多个线程执行一个操作时，其中任何一个线程要么完全执行完此操作，要么没有执行此操作的任何步骤</strong>，那么这个操作就是原子的。</p>
+<h2 id="volatile-语义"><a href="#volatile-语义" class="headerlink" title="volatile 语义"></a>volatile 语义</h2><p>volatile 相当于 synchronized 的弱实现，也就是 volatile 实现了 synchronized 的语义，却没有锁的机制，它确保对 volatile 字段的更新以可以预见的方式告知其他的线程。</p>
+<p>volatile 包含以下语义：</p>
+<ul>
+<li>Java 储存模型不会对 volatile 指令的操作进行排序：这个保证对 volatile 变量的操作时按照指令的出现顺序执行的。</li>
+<li>volatile 变量不会被缓存在寄存器中（只有拥有的线程可见）或其他对 cpu 不可见的地方，每次总是从主存中读取 volatile 变量的结果。也就是说对于 volatile 变量的修改，其他线程总是可见的，并且不是使用自己线程内部变量。也就是在 happens-before 法则中，对一个 volatile 变量的写操作，其后的任何读操作理解可见此操作的结果。</li>
+</ul>
+<p>尽管 volatile 变量的特性不错，但是 volatile 并不能保证线程安全，也就是 volatile 不是原则性的，volatile 变量只能保证可见性（一个线程修改后其它线程能够理解看到此变化后的结果），</p>
+<p>应用 volatile 变量的三个原则：</p>
+<ul>
+<li>写入变量不依赖此变量的值，或者只有一个线程修改此变量</li>
+<li>变量的状态不需要与其它变量共同参与不变约束</li>
+<li>访问变量不需要加锁</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/java/" rel="tag"># java</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/07/15/ReentrantLock-%E5%92%8C-synchronized/" rel="next" title="ReentrantLock 和 synchronized">
+                  ReentrantLock 和 synchronized <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不是深谷</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
